@@ -1,7 +1,9 @@
 const Dashboard = () =>{
     return(
         <div>
-            <h1>Dashboard Page</h1>
+           <div className="max-w-7xl mx-auto px-4 py-8">
+            <p>Welcome Jhon Doe</p>
+           </div>
         </div>
     )
 }

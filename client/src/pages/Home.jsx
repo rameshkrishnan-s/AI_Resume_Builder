@@ -1,4 +1,4 @@
-import CallToAction from "../components/CallToAction";
+import CallToAction from "../components/home/CallToAction";
 import Banner from "../components/home/Banner";
 import Features from "../components/home/Features";
 import Footer from "../components/home/Footer";
