@@ -5,6 +5,8 @@ import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, FileText, FolderIc
 import PersonalInfoForm from "../components/PersonalInfoForm";
 import ResumePreview from "../components/ResumePreview";
 import TemplateSelector from "../components/TemplateSelector";
+import ColorPicker from "../components/ColorPicker";
+import ProfessionalSummaryForm from "../components/ProfessionalSummaryForm";
 
 const ResumeBuilder = () =>{
 
@@ -67,6 +69,7 @@ const ResumeBuilder = () =>{
                                     <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=>setResumeData(prev=>({
                                         ...prev,template
                                     }))}/>
+                                    <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev=>({...prev,accent_color:color}))}/>
                                 </div>
                                 <div className="flex items-center">
                                     {activeSectionIndex !== 0 && (
@@ -83,7 +86,12 @@ const ResumeBuilder = () =>{
                             <div className="space-y-6">
                                 {activeSection.id === 'personal' && (
                                     <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev=>({...prev,personal_info:data}))} removeBackground={removeBackground} setRemoveBackground={setRemoveBackground}/>
-                                )}                                
+                                )}    
+                                {
+                                    activeSection.id == 'summary' && (
+                                        <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=>setResumeData(prev=>({...prev,professional_summary:data}))} setResumeData={setResumeData}/>
+                                    )
+                                }                            
                             </div>
                         </div>
                     </div>
