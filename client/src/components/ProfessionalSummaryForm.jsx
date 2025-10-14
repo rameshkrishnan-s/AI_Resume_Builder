@@ -4,16 +4,18 @@ import React from 'react'
 const ProfessionalSummaryForm = ({ data, onChange }) => {
   return (
     <div className="space-y-3">
+      <div className='flex items-center justify-between'>
+        <div>
       <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
         Professional Summary
       </h3>
       <p className="text-sm text-gray-500">Add Summary for your resume</p>
-
+      </div>
       <button className="flex items-center gap-2 px-3 py-1 text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
         <Sparkles className="size-4" />
         AI Enhance
       </button>
-
+      </div>
       <textarea
         value={data || ""}
         onChange={(e) => onChange(e.target.value)}
