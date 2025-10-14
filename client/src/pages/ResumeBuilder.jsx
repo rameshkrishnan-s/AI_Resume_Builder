@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams,Link } from "react-router-dom";
 import { dummyResumeData } from "../assets/assets";
-import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, FileText, FolderIcon, GraduationCap, Sparkles, User } from "lucide-react";
+import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOff, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2, Share2Icon, Sparkles, User } from "lucide-react";
 import PersonalInfoForm from "../components/PersonalInfoForm";
 import ResumePreview from "../components/ResumePreview";
 import TemplateSelector from "../components/TemplateSelector";
@@ -32,11 +32,12 @@ const ResumeBuilder = () =>{
         const resume = dummyResumeData.find(resume =>  resume._id === resumeId)
         if(resume){
             setResumeData(resume)
-            document.title(resume.title)
+            document.title = resume.title || 'Resume Builder'
         }
     }
     const [activeSectionIndex,setActiveSectionIndex] = useState(0)
     const [removeBackground,setRemoveBackground] = useState(false)
+    
     const sections = [
         {id:"personal",name:"Personal Info",icon:User},
         {id:"summary",name:"Summary",icon:FileText},
@@ -50,7 +51,36 @@ const ResumeBuilder = () =>{
     useEffect(()=>{
         loadExistingResume();
     },[])
+    
 
+    const changeResumeVisibility = async () =>{
+        setResumeData({...resumeData,public : !resumeData.public})
+    }
+
+    const getShareUrl = () => `${window.location.origin}/view/${resumeId}`
+
+    const handleShare = async () =>{
+        const resumeUrl = getShareUrl();
+        if(navigator.share){
+            try{
+                await navigator.share({ url: resumeUrl, title: 'My Resume', text: 'Check out my resume' })
+                return;
+            }catch(err){
+                // fall through to clipboard on user cancel or failure
+            }
+        }
+        try{
+            await navigator.clipboard.writeText(resumeUrl)
+            alert('Link copied to clipboard')
+        }catch{
+            prompt('Copy this resume link:', resumeUrl)
+        }
+    }
+
+
+    const downloadResume = () =>{
+        window.print();
+    }
     return(
         <div>
             <div className="max-w-7xl mx-auto px-4 py-6">
@@ -117,12 +147,27 @@ const ResumeBuilder = () =>{
                                     )
                                 }                  
                             </div>
+                            <button className="bg-gradient-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm">Save Changes</button>
                         </div>
                     </div>
                     {/*Right Panel Preview*/}
                     <div className="lg:col-span-7 max-lg:mt-6">
-                        <div>
+                        <div className="relative w-full">
+                            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-end gap-2">
+                                {resumeData.public && (
+                                    <button onClick={handleShare} className="flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors">
+                                        <Share2Icon className="sixe-4"/>Share
+                                    </button>
+                                )}
+                                <button onClick={changeResumeVisibility} className="flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors">
+                                    {resumeData.public ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
+                                    {resumeData.public ? 'Public' : 'Private'}
+                                </button>
 
+                                <button onClick={downloadResume} className="flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-blue-300 hover:ring transition-colors">
+                                    <DownloadIcon className="size-4"/>Download
+                                </button>
+                            </div>
                         </div>
 
                         <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color}/>
