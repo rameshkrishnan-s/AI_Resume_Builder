@@ -2,8 +2,12 @@ import {FilePenIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIc
 import { useEffect, useState } from 'react';
 import {dummyResumeData} from '../assets/assets'
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const Dashboard = () =>{
+
+    const {user,token} = useSelector(state => state.auth)
+
     const colors = ["#9333ea",'#d97706','#dc2626','#0284c7','#16a34a']
     const [allResumes,setAllResumes] = useState([])
     const [showCreateResume,setShowCreateResume] = useState(false)
