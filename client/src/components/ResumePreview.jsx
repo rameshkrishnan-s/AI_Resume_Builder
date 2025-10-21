@@ -19,7 +19,7 @@ const ResumePreview = ({data,template,accentColor,classes=""}) => {
     }
   return (
     <div className='w-full bg-gray-100'>
-        <div className={'border border-gray-200 print:shadow-none print:border-none' + classes}>
+        <div id="resume-preview" className={'border border-gray-200 print:shadow-none print:border-none' + classes}>
             {renderTemplate()}
         </div>
         <style jsx>
@@ -41,7 +41,7 @@ const ResumePreview = ({data,template,accentColor,classes=""}) => {
                         visibility : visible;
                     }
                     #resume-preview{
-                        postion:absolute;
+                        position:absolute;
                         left:0;
                         top:0;
                         width:100%;

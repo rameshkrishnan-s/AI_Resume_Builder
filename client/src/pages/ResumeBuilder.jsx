@@ -11,10 +11,14 @@ import ExperienceForm from "../components/ExperienceForm";
 import EducationForm from "../components/EducationForm";
 import ProjectForm from "../components/ProjectForm";
 import SkillsForm from "../components/SkillsForm";
+import { useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import api from "../configs/api";
 
 const ResumeBuilder = () =>{
 
     const { resumeId } = useParams();
+    const { token } = useSelector(state => state.auth);
     const [resumeData,setResumeData] = useState({
         _id : '',
         title :'',
@@ -27,12 +31,21 @@ const ResumeBuilder = () =>{
         accent_color :'#3B82F6',
         public : false,  
     })
+    const [isLoading, setIsLoading] = useState(false);
+    const [isEnhancingSummary, setIsEnhancingSummary] = useState(false);
+    const [enhancingExpIndex, setEnhancingExpIndex] = useState(-1);
 
     const loadExistingResume = async () =>{
-        const resume = dummyResumeData.find(resume =>  resume._id === resumeId)
-        if(resume){
-            setResumeData(resume)
-            document.title = resume.title || 'Resume Builder'
+        try {
+            const { data } = await api.get(`/api/resumes/get/${resumeId}`, {
+                headers: { Authorization: token }
+            });
+            if(data.resume){
+                setResumeData(data.resume);
+                document.title = data.resume.title || 'Resume Builder';
+            }
+        } catch (error) {
+            console.error('Error loading resume:', error);
         }
     }
     const [activeSectionIndex,setActiveSectionIndex] = useState(0)
@@ -53,8 +66,106 @@ const ResumeBuilder = () =>{
     },[])
     
 
-    const changeResumeVisibility = async () =>{
-        setResumeData({...resumeData,public : !resumeData.public})
+    const enhanceSummary = async () => {
+        if (!resumeData.professional_summary || !resumeData.professional_summary.trim()) {
+            toast.error('Please write a draft summary first');
+            return;
+        }
+        setIsEnhancingSummary(true);
+        try {
+            const { data } = await api.post(
+                '/api/ai/enhance-pro-sum',
+                { userContent: resumeData.professional_summary },
+                { headers: { Authorization: token } }
+            );
+            if (data.enhancedContent) {
+                setResumeData(prev => ({ ...prev, professional_summary: data.enhancedContent }));
+                toast.success('Summary enhanced');
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message || 'Failed to enhance');
+        }
+        setIsEnhancingSummary(false);
+    };
+
+    const enhanceExperienceDescription = async (index, currentText) => {
+        if (!currentText || !currentText.trim()) {
+            toast.error('Please add a job description first');
+            return;
+        }
+        setEnhancingExpIndex(index);
+        try {
+            const { data } = await api.post(
+                '/api/ai/enhance-job-desc',
+                { userContent: currentText },
+                { headers: { Authorization: token } }
+            );
+            if (data.enhancedContent) {
+                setResumeData(prev => {
+                    const updated = [...(prev.experience || [])];
+                    updated[index] = { ...updated[index], description: data.enhancedContent };
+                    return { ...prev, experience: updated };
+                });
+                toast.success('Description enhanced');
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message || 'Failed to enhance');
+        }
+        setEnhancingExpIndex(-1);
+    };
+
+    const saveResume = async () => {
+        setIsLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('resumeId', resumeId);
+            formData.append('resumeData', JSON.stringify(resumeData));
+            formData.append('removeBackground', removeBackground);
+            
+            // Add image if it's a file object
+            if (resumeData.personal_info?.image && typeof resumeData.personal_info.image === 'object') {
+                formData.append('image', resumeData.personal_info.image);
+            }
+
+            const { data } = await api.put('/api/resumes/update', formData, {
+                headers: { 
+                    Authorization: token,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            toast.success('Resume saved successfully!');
+            setResumeData(data.resume);
+        } catch (error) {
+            console.error('Error saving resume:', error);
+            toast.error(error?.response?.data?.message || 'Failed to save resume');
+        }
+        setIsLoading(false);
+    };
+
+    const changeResumeVisibility = async () => {
+        const newVisibility = !resumeData.public;
+        setResumeData({...resumeData, public: newVisibility});
+        
+        try {
+            const formData = new FormData();
+            formData.append('resumeId', resumeId);
+            formData.append('resumeData', JSON.stringify({...resumeData, public: newVisibility}));
+            
+            await api.put('/api/resumes/update', formData, {
+                headers: { 
+                    Authorization: token,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            toast.success(`Resume is now ${newVisibility ? 'public' : 'private'}`);
+        } catch (error) {
+            console.error('Error updating visibility:', error);
+            toast.error('Failed to update visibility');
+            // Revert the change
+            setResumeData({...resumeData, public: !newVisibility});
+        }
     }
 
     const getShareUrl = () => `${window.location.origin}/view/${resumeId}`
@@ -123,12 +234,22 @@ const ResumeBuilder = () =>{
                                 )}    
                                 {
                                     activeSection.id == 'summary' && (
-                                        <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=>setResumeData(prev=>({...prev,professional_summary:data}))} setResumeData={setResumeData}/>
+                                        <ProfessionalSummaryForm 
+                                            data={resumeData.professional_summary} 
+                                            onChange={(data)=>setResumeData(prev=>({...prev,professional_summary:data}))}
+                                            onEnhance={enhanceSummary}
+                                            isEnhancing={isEnhancingSummary}
+                                        />
                                     )
                                 } 
                                 {
                                     activeSection.id == 'experience' && (
-                                        <ExperienceForm data={resumeData.experience} onChange={(data)=>setResumeData(prev=>({...prev,experience:data}))} setResumeData={setResumeData}/>
+                                        <ExperienceForm 
+                                            data={resumeData.experience} 
+                                            onChange={(data)=>setResumeData(prev=>({...prev,experience:data}))}
+                                            onEnhanceDescription={enhanceExperienceDescription}
+                                            enhancingIndex={enhancingExpIndex}
+                                        />
                                     )
                                 }     
                                 {
@@ -147,7 +268,13 @@ const ResumeBuilder = () =>{
                                     )
                                 }                  
                             </div>
-                            <button className="bg-gradient-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm">Save Changes</button>
+                            <button 
+                                onClick={saveResume}
+                                disabled={isLoading}
+                                className="bg-gradient-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? 'Saving...' : 'Save Changes'}
+                            </button>
                         </div>
                     </div>
                     {/*Right Panel Preview*/}

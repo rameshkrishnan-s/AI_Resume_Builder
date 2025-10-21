@@ -6,7 +6,7 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import Preview from "./pages/Preview";
 import Login from "./pages/Login";
 import { useDispatch } from "react-redux";
-import api from "./congifs/api";
+import api from "./configs/api";
 import { setLoading, login } from "./app/features/authSlice";
 import { useEffect } from "react";
 import {Toaster} from 'react-hot-toast'

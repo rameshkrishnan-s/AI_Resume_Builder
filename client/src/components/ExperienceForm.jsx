@@ -1,7 +1,7 @@
 import { Briefcase, Plus, Sparkles, Trash2 } from 'lucide-react'
 import React from 'react'
 
-const ExperienceForm = ({data,onChange}) => {
+const ExperienceForm = ({data,onChange,onEnhanceDescription,enhancingIndex}) => {
 
     const addExperience = () =>{
         const newExperience = {
@@ -80,9 +80,9 @@ const ExperienceForm = ({data,onChange}) => {
                     <div className='space-y-2'>
                         <div className='flex items-center justify-between'>
                             <label className='text-sm font-medium text-gray-700'>Job Description</label>
-                            <button className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors disabled:opacity-50'>
+                            <button onClick={()=>onEnhanceDescription(index, experience.description)} disabled={enhancingIndex === index} className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors disabled:opacity-50'>
                                 <Sparkles className='w-3 h-3'/>
-                                Enhance with AI
+                                {enhancingIndex === index ? 'Enhancing...' : 'Enhance with AI'}
                             </button>
                         </div>
                         <textarea value={experience.description || ""} onChange={(e)=> updateExperience(index,"description",e.target.value)} className={`${inputStyle} resize-none h-28`} placeholder='Describe your key responsibilities and achievements...'/>

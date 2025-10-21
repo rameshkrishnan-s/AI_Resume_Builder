@@ -1,7 +1,7 @@
 import {Mail, User2Icon,Lock} from 'lucide-react'
 import React from 'react'
 import { login } from '../app/features/authSlice'
-import api from '../congifs/api'
+import api from '../configs/api'
 import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 const Login = () =>{

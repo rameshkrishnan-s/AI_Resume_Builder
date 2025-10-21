@@ -95,8 +95,11 @@ export const updateResume = async (req,res) => {
         const {resumeId,resumeData,removeBackground} = req.body;
         const image = req.file;
 
+        if(!resumeId || !resumeData){
+            return res.status(400).json({message: 'Missing required fields'});
+        }
 
-        let resumeDataCopy = JSON.parse(resumeData);
+        let resumeDataCopy = JSON.parse(JSON.stringify(resumeData));
         
         if(image){
             const imageBufferData = fs.createReadStream(image.path)
@@ -112,7 +115,11 @@ export const updateResume = async (req,res) => {
         resumeDataCopy.personal_info.image = response.url
 
         }
-        const resume = await Resume.findByIdAndUpdate({userId,_id : resumeId},resumeDataCopy, {new : true})
+        const resume = await Resume.findOneAndUpdate({userId, _id : resumeId}, resumeDataCopy, {new : true});
+
+        if(!resume){
+            return res.status(404).json({message: 'Resume not found'});
+        }
 
         return res.status(200).json({message : 'Saved Successfully',resume})
     } catch (error) {

@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react'
 import React from 'react'
 
-const ProfessionalSummaryForm = ({ data, onChange }) => {
+const ProfessionalSummaryForm = ({ data, onChange, onEnhance, isEnhancing }) => {
   return (
     <div className="space-y-3">
       <div className='flex items-center justify-between'>
@@ -11,9 +11,9 @@ const ProfessionalSummaryForm = ({ data, onChange }) => {
       </h3>
       <p className="text-sm text-gray-500">Add Summary for your resume</p>
       </div>
-      <button className="flex items-center gap-2 px-3 py-1 text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+      <button onClick={onEnhance} disabled={isEnhancing} className="flex items-center gap-2 px-3 py-1 text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-50">
         <Sparkles className="size-4" />
-        AI Enhance
+        {isEnhancing ? 'Enhancing...' : 'AI Enhance'}
       </button>
       </div>
       <textarea
