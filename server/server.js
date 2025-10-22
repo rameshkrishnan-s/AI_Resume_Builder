@@ -18,7 +18,6 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://ai-resume-builder-2ii5.onrender.com',
     'https://resume-builder-chi-eight.vercel.app'
   ],
   credentials: true
