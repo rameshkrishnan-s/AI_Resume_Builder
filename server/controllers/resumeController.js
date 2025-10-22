@@ -101,7 +101,7 @@ export const updateResume = async (req,res) => {
 
         let resumeDataCopy = JSON.parse(JSON.stringify(resumeData));
         
-        if(image){
+        if(image && process.env.IMAGEKIT_PRIVATE_KEY && process.env.IMAGEKIT_PUBLIC_KEY && process.env.IMAGEKIT_URL_ENDPOINT){
             const imageBufferData = fs.createReadStream(image.path)
             const response = await imagekit.files.upload({
             file: imageBufferData,
