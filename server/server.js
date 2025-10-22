@@ -13,16 +13,17 @@ const PORT = process.env.PORT || 3000;
 // Database Connection
 await connectDB();
 
-app.use(express.json());
 app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://ai-resume-builder-2ii5.onrender.com',
     'https://resume-builder-chi-eight.vercel.app',
     'https://ai-resume-builder-eta-one.vercel.app'
   ],
   credentials: true
 }));
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Server is live");
